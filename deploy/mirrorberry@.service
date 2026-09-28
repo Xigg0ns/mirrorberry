@@ -1,0 +1,36 @@
+# Template unit: the instance name is the Linux user that owns ~/mirrorberry.
+#   sudo cp deploy/mirrorberry@.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now mirrorberry@$USER
+#
+# MirrorBerry takes over tty1 (the HDMI console) so the login prompt and the
+# blinking cursor can't draw over it. Log in over SSH, or press Ctrl+Alt+F2
+# on a keyboard for a local console.
+
+[Unit]
+Description=MirrorBerry display (%i)
+After=systemd-user-sessions.service getty@tty1.service network-online.target
+Wants=network-online.target
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+User=%i
+SupplementaryGroups=video render input
+WorkingDirectory=/home/%i/mirrorberry
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m mirrorberry
+
+# Own tty1 so the app can switch the text console off while it draws.
+TTYPath=/dev/tty1
+StandardInput=tty
+StandardOutput=journal
+StandardError=journal
+TTYReset=yes
+TTYVHangup=yes
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

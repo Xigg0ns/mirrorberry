@@ -1,0 +1,7 @@
+# Your own settings: API keys and private calendar URLs stay on the Pi.
+config.toml
+
+__pycache__/
+*.py[cod]
+*.png
+!docs/*.png

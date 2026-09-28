@@ -1,0 +1,133 @@
+# MirrorBerry configuration
+#
+# This layout and [theme] reproduce a MagicMirror² screen (zoom 2 on 2560x1440)
+# on a 1920x1080 screen. Sizes are in MagicMirror's CSS px, times [display] scale.
+
+[general]
+locale = "sv_SE.UTF-8"      # language for day/month names; "" = system default
+
+[display]
+backend     = "auto"        # auto: framebuffer on a console-only Pi, SDL window elsewhere
+                            # fbdev: write to /dev/fb0 (no GPU needed)
+                            # sdl: let SDL drive the screen (KMS/DRM via the GPU on a Pi)
+fullscreen  = true          # false = windowed, for development on a PC
+window_size = [960, 540]    # windowed mode only (logical width x height)
+rotation    = 0             # 0, 90, 180 or 270 degrees counter-clockwise (fullscreen only)
+background  = "#000000"
+scale       = 1.5           # MagicMirror px -> screen px. 1.5 on 1080p looks like MagicMirror's
+                            # zoom 2 on 1440p; "auto" = 1.0 on 1080p (MagicMirror's zoom 1)
+
+[layout]
+margin         = 40         # outer screen margin, MagicMirror px
+gutter         = 0          # gap between zones, MagicMirror px
+padding        = 0          # inside each zone, fraction of its shorter side
+stack_gap      = 21         # between widgets stacked in one zone, MagicMirror px
+column_weights = [1, 1, 1]  # relative widths:  Left, Center, Right
+row_weights    = [1, 1, 0.5247]  # relative heights: Top, Center, Bottom
+                                 # (the bottom row starts where NAMNSDAG sat on MagicMirror)
+
+[layout.valign]             # per zone: "top", "center" or "bottom"
+BottomLeft = "top"          # (bottom-row zones default to "bottom", like MagicMirror)
+
+[theme]                     # like a MagicMirror custom.css; leave out = MagicMirror's defaults
+sizes          = { xsmall = 20, small = 26.67, medium = 40, large = 50 }
+line_heights   = { xsmall = 1.135, small = 1.1, medium = 1.1, large = 1.0 }
+letter_spacing = { large = -3 }
+header_size    = 40         # module headers ("VÄDER", "KALENDER")
+header_line    = 1.0        # header line height, x header_size
+header_margin  = 6          # rule -> content
+
+[loop]
+tick_ms = 1000              # longest the loop ever sleeps; widgets are woken exactly when due
+
+# [zones.<Name>] holds one widget. Repeat [[zones.<Name>]] to stack several, top to
+# bottom, like modules in a MagicMirror region. A zone reaches down over empty zones
+# below it. Zones not listed here are empty.
+# Names: TopLeft TopCenter TopRight / CenterLeft Center CenterRight / BottomLeft ...
+
+# --- left column: weather, forecast ---------------------------------------------
+
+[[zones.TopLeft]]
+widget    = "weather"
+type      = "current"
+provider  = "smhi"              # "smhi" (Sweden/Nordics) or "openmeteo" (worldwide)
+header    = "Väder"
+latitude  = 59.3293             # your location (decimal degrees)
+longitude = 18.0686
+temp_gap  = 5                   # icon -> temperature, MagicMirror px
+update_interval = 600           # seconds between downloads (current and forecast for the same
+                                # place share one download; the shorter interval wins)
+
+[[zones.TopLeft]]
+widget    = "weather"
+type      = "forecast"
+provider  = "smhi"
+header    = "Prognos"
+latitude  = 59.3293
+longitude = 18.0686
+max_days  = 5
+update_interval = 600
+capitalize_names = false        # "tis" like MagicMirror; true = "Tis"
+fade      = false
+cell_padding = { day_right = 16, icon_right = 20, min_left = 12.5 }
+
+# --- centre: departures ------------------------------------------------------------
+
+[zones.TopCenter]
+widget   = "resrobot"           # public transport departures (MMM-ResRobot)
+provider = "resrobot"           # "resrobot" (ResRobot v2.1, deprecated by Trafiklab) or
+                                # "trafiklab" (Trafiklab Realtime API, its replacement; needs that API's key)
+api_key  = ""                   # your key from trafiklab.se for the provider above
+maximum_entries = 6
+truncate_after  = 0             # destination: cut at first space after N characters (0 = off)
+get_relative    = 0             # show "5 min"/"Nu" when fewer than N minutes left (0 = off)
+skip_minutes    = 0             # hide departures leaving within N minutes
+update_interval = 300           # seconds between downloads, per route (each one is an API call)
+fade            = false
+show_track      = false
+column_widths   = [75.4, 36.6, 61.3]  # time, icon, line: MMM-ResRobot's CSS column widths
+# lines        = ["4", "19"]    # only these lines
+# destinations = ["Hässelby"]   # only destinations containing any of these
+
+[[zones.TopCenter.routes]]      # repeat for more routes
+from = "740020749"              # stop id: Stockholm City (T-Centralen); find yours with ResRobot's stop lookup
+to   = ""                       # optional, ResRobot only: vehicles heading towards this stop id
+
+# --- right column: clock, calendar ---------------------------------------------------
+
+[[zones.TopRight]]
+widget      = "clock"
+sizing      = "theme"           # MagicMirror sizes; "fit" = fill the zone
+time_format = "%H:%M"
+seconds     = true
+date_format = "%A, %-d %b %Y"   # "" hides the date line
+capitalize_names = true         # "Söndag, 27 Sep"; false = "söndag, 27 sep" like MagicMirror
+week_format = "Vecka %-V"       # ISO week number; "" hides the line
+
+[[zones.TopRight]]
+widget          = "calendar"
+header          = "Kalender"
+maximum_entries = 10
+fetch_interval  = 3600          # seconds between downloads, per calendar
+table_class     = "xsmall"      # text size, like MagicMirror's tableClass
+time_format     = "absolute"    # dates instead of "om 3 dagar"
+full_day_event_date_format = "%a, %d %b"   # "Tor, 01 Okt"
+capitalize_names = true         # "Tor, 01 Okt"; false = "Tor, 01 okt" like MagicMirror
+fade            = false
+cell_padding    = { title_left = 6, title_right = 0, time_left = 20 }
+
+[[zones.TopRight.calendars]]    # repeat this block for more calendars
+url    = "https://calendar.google.com/calendar/ical/sv.swedish%23holiday%40group.v.calendar.google.com/public/basic.ics"
+symbol = "calendar-days"        # any Font Awesome icon name
+# fetch_interval = 900          # this calendar only, overrides the one above
+
+# [[zones.TopRight.calendars]]
+# url    = "https://…/birthdays.ics"
+# symbol = "cake-candles"
+
+# --- bottom left: name days ---------------------------------------------------------
+
+[zones.BottomLeft]
+widget = "namnsdag"             # today's Swedish name days (MMM-Namnsdag)
+header = "Namnsdag"
+update_interval = 21600         # seconds; a new day is always fetched right after midnight
