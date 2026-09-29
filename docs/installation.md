@@ -60,7 +60,7 @@ Reboot after these changes.
 ## 2. Install MirrorBerry
 
 ```bash
-git clone https://github.com/<you>/mirrorberry.git ~/mirrorberry
+git clone https://github.com/Xigg0ns/mirrorberry.git ~/mirrorberry
 cd ~/mirrorberry
 cp config.example.toml config.toml
 nano config.toml

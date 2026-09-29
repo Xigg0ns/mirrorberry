@@ -42,7 +42,7 @@ On a Raspberry Pi running **Raspberry Pi OS Lite** (full steps in
 
 ```bash
 sudo apt install -y python3-pygame fonts-roboto-unhinted python3-recurring-ical-events git
-git clone https://github.com/<you>/mirrorberry.git ~/mirrorberry
+git clone https://github.com/Xigg0ns/mirrorberry.git ~/mirrorberry
 cd ~/mirrorberry
 cp config.example.toml config.toml   # then edit config.toml
 python3 -m mirrorberry               # Esc or q to quit
