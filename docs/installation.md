@@ -53,7 +53,7 @@ sudo nmcli connection modify "<name>" 802-11-wireless.powersave 2
 ```
 
 Optional: if you don't use Bluetooth, add `dtoverlay=disable-bt` to
-`/boot/firmware/config.txt` and run `sudo systemctl disable hciuart`.
+`/boot/firmware/config.txt`.
 
 Reboot after these changes.
 
